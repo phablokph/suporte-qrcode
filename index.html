@@ -1,20 +1,6 @@
 <!--
 Suporte-QR-Impressoras.html
-Versão: Prova de conceito (single-file)
-Instruções rápidas:
- 1) Baixe este arquivo (clique nos três pontos no canto do documento no Canvas -> Download).
- 2) Abra no bloco de notas e ajuste as configurações logo abaixo (variáveis em MAIÚSCULAS).
- 3) Hospede o arquivo em um host estático (GitHub Pages, intranet, SharePoint estático, Netlify) OU coloque o link localmente para testar.
- 4) Gere QR codes apontando para: https://SEU_HOST/suporte-qrcode/?printer=IMP001 (troque IMP001 pelo ID da impressora).
-
-O arquivo contém:
- - KB (base de erros) em formato JSON (edite/adicione conforme os manuais);
- - Interface mobile-friendly que procura correspondências e mostra soluções simples;
- - Botão "Abrir chamado" que abre a URL do ServiceNow (coloque sua URL no campo SERVICENOW_URL);
- - Campo para colar o número do chamado e copiar uma mensagem pronta para enviar via Teams (copiar / colar manual no chat do Teams);
- - Opção para abrir um formulário de LOG (Google Forms) para registrar o evento (opcional).
-
-AVISO: Para integração automática com ServiceNow (criar chamados por API ou pre-fill completo via parâmetros) é necessário suporte do time de ServiceNow da Suzano. Nesta POC deixei uma abertura simples via link prefill (parâmetros genéricos) e um campo para o usuário colar o número do chamado.
+Versão: Completa (single-file) — inclui 50 problemas
 -->
 
 <!doctype html>
@@ -40,8 +26,8 @@ AVISO: Para integração automática com ServiceNow (criar chamados por API ou p
     .muted{color:#64748b;font-size:13px}
     .footer{font-size:13px;color:#475569;margin-top:12px}
     .center{text-align:center}
-    .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#062e78;margin-right:6px;font-weight:600}
     @media (max-width:520px){.row{flex-direction:column}}
+    footer{margin-top:18px;text-align:center;color:#475569;font-size:13px}
   </style>
 </head>
 <body>
@@ -49,7 +35,7 @@ AVISO: Para integração automática com ServiceNow (criar chamados por API ou p
     <h1>Suporte rápido — Impressora</h1>
     <p class="lead">Escaneie o QR na impressora, verifique a sugestão e, se não resolver, abra o chamado no ServiceNow pelo seu celular.</p>
 
-    <div id="printerInfo" class="muted"></div>
+    <div id="printerInfo" class="muted" aria-live="polite"></div>
 
     <label for="issueSelect">Selecione o problema (ou digite abaixo)</label>
     <select id="issueSelect">
@@ -75,492 +61,122 @@ AVISO: Para integração automática com ServiceNow (criar chamados por API ou p
       </div>
 
       <div id="callActions" style="display:none;margin-top:12px">
-        <label class="small">Antes de abrir o chamado (opcional): registre aqui para controle</label>
+        <label class="small">Observação (opcional)</label>
         <div class="row" style="margin-bottom:8px">
           <input id="obs" type="text" placeholder="Observação (ex: usuário preferiu não tentar)" />
         </div>
         <div class="row">
           <button id="openSN">Abrir chamado no ServiceNow</button>
-          <button id="logEvent" class="ghost">Registrar evento (Google Form)</button>
-        </div>
-
-        <div style="margin-top:10px">
-          <label class="small">Número do chamado (cole aqui após abrir)</label>
-          <input id="ticketInput" type="text" placeholder="Ex: CH123456" />
-          <div style="margin-top:8px" class="row">
-            <button id="copyMsg">Copiar mensagem para Teams</button>
-            <button id="openTeams" class="ghost">Abrir Teams (se configurado)</button>
-          </div>
         </div>
       </div>
 
     </div>
 
-    <div class="footer center">
-      <div>Se quiser, peça ao time de ServiceNow a URL de criação de incident com parâmetros para pré-fill (para automatizar o preenchimento do chamado).</div>
-    </div>
   </div>
 
+  <footer>Desenvolvido por Phablo Salazar - 2025</footer>
+
   <script>
-    /* ========== CONFIGURE AQUI ========== */
-    // URL base (página de criação de incident do ServiceNow). Edite para a sua instância.
     const SERVICENOW_URL = 'https://suzanoprod.service-now.com/suzano_ti_vc?id=sc_cat_item&sys_id=c3df8aeddb89e74439e4a19b8a96197d';
 
-    // URL pré-preenchida de LOG (opcional) — exemplo: link pré-preenchido do Google Forms que escreve em uma planilha.
-    // Use {printer},{issue},{resolved},{ticket} como placeholders que serão substituídos automaticamente.
-    const LOG_FORM_PREFILLED_URL = ''; // ex: 'https://docs.google.com/forms/d/e/ID/viewform?usp=pp_url&entry.123456={printer}&entry.234567={issue}&entry.345678={resolved}&entry.456789={ticket}'
-
-    // Lista de técnicos (nome + email) para sugestão de envio de mensagem. Emails usados apenas para template; abrir chat automático depende da faixa de deploy do Teams.
-    const TECHNICIANS = [
-      { name: 'Técnico Local', email: 'tecnico.local@empresa.com' }
-      // adicione mais se quiser
-    ];
-
-    // Base de conhecimento (KB) — GLOSSÁRIO. Edite/adicione entradas com as principais falhas descritas nos manuais.
-    // Cada item deve conter id, title, keywords (array) e steps (array). Mantenha palavras-chaves simples para match.
+    // Base com 50 problemas comuns
     const KB = [
-      {
-        id: 'jam',
-        title: 'Atolamento de papel',
-        keywords: ['atolamento', 'atolou', 'paper jam', 'papel preso'],
-        steps: [
-          '1) Desligue a impressora pelo botão (aguarde 10s).',
-          '2) Abra a tampa traseira e retire cuidadosamente o papel puxando na direção recomendada pelo manual.',
-          '3) Verifique bandejas e guias; remova pedaços de papel.',
-          '4) Feche tudo e religue. Imprima página de teste.'
-        ]
-      },
-      {
-        id: 'paper_fuser',
-        title: 'Papel preso no fusor',
-        keywords: ['fusor', 'papel preso fusor', 'papel preso traseira'],
-        steps: [
-          '1) Desligue a impressora e aguarde o fusor esfriar (5-10 min).',
-          '2) Abra a tampa traseira e puxe o papel lentamente na direção da saída.',
-          '3) Verifique por pedaços rasgados e remova-os totalmente.'
-        ]
-      },
-      {
-        id: 'double_feed',
-        title: 'Alimentação dupla (puxa 2 folhas)',
-        keywords: ['puxa 2', 'alimentacao dupla', 'duplo alimentacao'],
-        steps: [
-          '1) Retire a resma e ventile as folhas.',
-          '2) Ajuste as guias laterais da bandeja.',
-          '3) Não sobrecarregue a bandeja além da marca.'
-        ]
-      },
-      {
-        id: 'moist_paper',
-        title: 'Papel úmido / enrugado',
-        keywords: ['papel úmido', 'enrugado', 'papel molhado'],
-        steps: [
-          '1) Substitua por papel novo e seco.',
-          '2) Não armazene papel em locais úmidos.',
-          '3) Se o problema persistir, limpar roletes do alimentador.'
-        ]
-      },
-      {
-        id: 'paper_not_recognized',
-        title: 'Papel não reconhecido',
-        keywords: ['não reconhecido', 'paper not recognized'],
-        steps: [
-          '1) Verifique o tipo de papel no driver (A4, Carta, Ofício).',
-          '2) Recoloque o papel alinhado e reinicie a impressão.'
-        ]
-      },
-      {
-        id: 'thick_paper',
-        title: 'Papel muito grosso (cartão)',
-        keywords: ['papel grosso', 'cartão', 'thick paper'],
-        steps: [
-          '1) Use bandeja manual e selecione a opção apropriada no driver (cartão).',
-          '2) Imprima uma página de teste.'
-        ]
-      },
-      {
-        id: 'skewed_paper',
-        title: 'Papel puxando torto',
-        keywords: ['puxa torto', 'torto', 'skewed'],
-        steps: [
-          '1) Ajuste as guias laterais da bandeja. ',
-          '2) Ventile a pilha para separar folhas grudadas.'
-        ]
-      },
-      {
-        id: 'no_paper_error',
-        title: 'Erro "Sem papel" mesmo cheio',
-        keywords: ['sem papel', 'no paper'],
-        steps: [
-          '1) Retire toda a bandeja, alinhe e reinsira o papel.',
-          '2) Verifique sensores visíveis e remova obstruções.'
-        ]
-      },
-      {
-        id: 'duplex_jam',
-        title: 'Enrosco no duplex (frente e verso)',
-        keywords: ['duplex', 'enrosco duplex', 'duplex jam'],
-        steps: [
-          '1) Abra as portas traseiras específicas do duplex.',
-          '2) Limpe roletes traseiros com pano não peludo umedecido.',
-          '3) Remova qualquer papel preso e teste novamente.'
-        ]
-      },
-      {
-        id: 'torn_paper',
-        title: 'Papel rasgado dentro da máquina',
-        keywords: ['papel rasgado', 'rasgado'],
-        steps: [
-          '1) Desligue a impressora e abra as tampas necessárias.',
-          '2) Remova todos os pedaços com cuidado para evitar dano aos sensores.',
-          '3) Feche e teste.'
-        ]
-      },
-      {
-        id: 'low_toner',
-        title: 'Toner baixo / alerta de toner',
-        keywords: ['toner baixo', 'tóner', 'low toner'],
-        steps: [
-          '1) Verifique o nível no painel.',
-          '2) Se possível, agite o cartucho e recoloque.',
-          '3) Substitua o cartucho se continuar o alerta.'
-        ]
-      },
-      {
-        id: 'toner_smear',
-        title: 'Toner borrando na folha',
-        keywords: ['borrando', 'toner borrando'],
-        steps: [
-          '1) Limpe o fusor seguindo o manual.',
-          '2) Troque o cartucho se houver vazamento de pó.'
-        ]
-      },
-      {
-        id: 'page_black',
-        title: 'Folha saindo toda preta',
-        keywords: ['toda preta', 'página preta'],
-        steps: [
-          '1) Substitua o cartucho de toner imediatamente.',
-          '2) Verifique se o fusor não está danificado.'
-        ]
-      },
-      {
-        id: 'white_lines',
-        title: 'Falha de impressão (linhas brancas)',
-        keywords: ['linhas brancas', 'faixas brancas'],
-        steps: [
-          '1) Agite o cartucho para redistribuir o pó.',
-          '2) Se persistir, troque o cartucho ou cilindro.'
-        ]
-      },
-      {
-        id: 'cartridge_not_recognized',
-        title: 'Cartucho não reconhecido',
-        keywords: ['não reconhecido cartucho', 'cartucho não reconhece'],
-        steps: [
-          '1) Retire o cartucho e limpe os contatos com pano seco.',
-          '2) Recoloque firmemente e reinicie a impressora.'
-        ]
-      },
-      {
-        id: 'incompatible_cart',
-        title: 'Cartucho incompatível',
-        keywords: ['incompatível', 'cartucho incompatível'],
-        steps: [
-          '1) Confirme o modelo do cartucho com o manual do equipamento.',
-          '2) Utilize consumível compatível/original.'
-        ]
-      },
-      {
-        id: 'faded_print',
-        title: 'Impressão clara / desbotada',
-        keywords: ['clara', 'desbotada', 'impressao fraca'],
-        steps: [
-          '1) Ajuste a densidade no driver ou painel.',
-          '2) Troque o toner se necessário.'
-        ]
-      },
-      {
-        id: 'spots',
-        title: 'Manchas repetidas na folha',
-        keywords: ['manchas', 'spots', 'mancha repetida'],
-        steps: [
-          '1) Verifique cilindro e fusor por sujeira.',
-          '2) Limpe cuidadosamente ou agende manutenção.'
-        ]
-      },
-      {
-        id: 'toner_leak',
-        title: 'Vazamento de pó de toner',
-        keywords: ['vazamento', 'pó toner'],
-        steps: [
-          '1) Remova o cartucho e limpe com pano seco.',
-          '2) Substitua o cartucho e registre chamado se persistir.'
-        ]
-      },
-      {
-        id: 'wifi_no_connect',
-        title: 'Não conecta no Wi‑Fi',
-        keywords: ['wifi', 'não conecta wifi', 'sem wifi'],
-        steps: [
-          '1) Verifique a senha e SSID no painel da impressora.',
-          '2) Reinicie roteador/impressora e tente reconectar.',
-          '3) Se necessário, peça suporte de rede.'
-        ]
-      },
-      {
-        id: 'usb_not_recognized',
-        title: 'Cabo USB não reconhecido',
-        keywords: ['usb', 'cabo usb', 'não reconhece usb'],
-        steps: [
-          '1) Teste outro cabo USB e outra porta do PC.',
-          '2) Reinicie o PC e a impressora.'
-        ]
-      },
-      {
-        id: 'network_cable',
-        title: 'Erro de rede cabeada',
-        keywords: ['rede cabeada', 'cabo de rede', 'ethernet'],
-        steps: [
-          '1) Verifique se o cabo RJ‑45 está bem conectado e há luz no switch.',
-          '2) Troque o cabo se houver dúvidas.'
-        ]
-      },
-      {
-        id: 'ip_duplicate',
-        title: 'IP duplicado na rede',
-        keywords: ['ip duplicado', 'IP duplicado'],
-        steps: [
-          '1) Configure IP automático (DHCP) ou solicite reserva de IP.',
-          '2) Reinicie a impressora.'
-        ]
-      },
-      {
-        id: 'driver_missing',
-        title: 'Driver não instalado',
-        keywords: ['driver', 'não instalado', 'instalar driver'],
-        steps: [
-          '1) Baixe o driver no site do fabricante (HP/Samsung).',
-          '2) Instale como Administrador no Windows.'
-        ]
-      },
-      {
-        id: 'mobile_print_fail',
-        title: 'Não imprime de dispositivos móveis',
-        keywords: ['mobile print', 'hp smart', 'samsung mobile print'],
-        steps: [
-          '1) Peça para instalar o app HP Smart ou Samsung Mobile Print no celular.',
-          '2) Verifique se dispositivo e impressora estão na mesma rede.'
-        ]
-      },
-      {
-        id: 'offline',
-        title: 'Impressora offline / não responde',
-        keywords: ['offline', 'não responde', 'impressora offline'],
-        steps: [
-          '1) Verifique cabos de rede e reinicie a impressora.',
-          '2) Remova e adicione a impressora no Windows se necessário.'
-        ]
-      },
-      {
-        id: 'roller',
-        title: 'Rolinho não puxa papel',
-        keywords: ['rolete', 'rolinho', 'não puxa'],
-        steps: [
-          '1) Limpe roletes com pano levemente úmido (sem álcool).',
-          '2) Se ainda falhar, agende substituição de rolete.'
-        ]
-      },
-      {
-        id: 'fuser_overheat',
-        title: 'Fusor superaquecendo',
-        keywords: ['fusor superaquecendo', 'sobre aquecimento'],
-        steps: [
-          '1) Desligue a impressora e aguarde 15 minutos para esfriar.',
-          '2) Se persistir, abra chamado técnico.'
-        ]
-      },
-      {
-        id: 'strange_noise',
-        title: 'Ruído estranho ao imprimir',
-        keywords: ['ruído', 'barulho', 'som estranho'],
-        steps: [
-          '1) Pare a impressão e verifique por objetos presos (grampos/clipes).',
-          '2) Se houver partes soltas, registre chamado.'
-        ]
-      },
-      {
-        id: 'scanner',
-        title: 'Scanner / ADF não funciona',
-        keywords: ['scanner', 'ADF', 'não digitaliza'],
-        steps: [
-          '1) Verifique cabos USB/flat e reinicie o aparelho.',
-          '2) Limpe os roletes do ADF com álcool isopropílico.'
-        ]
-      },
-      {
-        id: 'cover_open',
-        title: 'Erro de tampa aberta',
-        keywords: ['tampa aberta', 'cover open'],
-        steps: [
-          '1) Feche todas as tampas corretamente e verifique trava.',
-          '2) Se o sensor estiver preso, abra um chamado.'
-        ]
-      },
-      {
-        id: 'spooler',
-        title: 'Fila de impressão travada (spooler)',
-        keywords: ['spooler', 'fila travada', 'print spooler'],
-        steps: [
-          '1) No Windows, abra Serviços → pare o Print Spooler e limpe C:\Windows\System32\spool\PRINTERS.',
-          '2) Reinicie o serviço e tente imprimir novamente.'
-        ]
-      },
-      {
-        id: 'firmware',
-        title: 'Firmware desatualizado',
-        keywords: ['firmware', 'atualizar firmware'],
-        steps: [
-          '1) Baixe a versão mais recente do site do fabricante.',
-          '2) Siga as instruções do fabricante para atualização.'
-        ]
-      }
+      { id: 'jam', title: 'Atolamento na bandeja', keywords: ['atolamento','bandeja','papel preso'], steps: ['Retire o papel','Alinhe as folhas','Não ultrapasse a guia'] },
+      { id: 'fuser_jam', title: 'Papel preso no fusor', keywords: ['fusor'], steps: ['Abra tampa traseira','Puxe suavemente','Remova papel'] },
+      { id: 'double_feed', title: 'Alimentação dupla', keywords: ['duas folhas','alimentação dupla'], steps: ['Retire e ventile o papel','Ajuste guias laterais'] },
+      { id: 'moist_paper', title: 'Papel úmido enrugando', keywords: ['papel úmido','molhado'], steps: ['Troque por papel seco','Guarde resma fechada'] },
+      { id: 'not_recognized', title: 'Papel não reconhecido', keywords: ['papel não reconhecido'], steps: ['Ajuste tipo de papel no driver'] },
+      { id: 'thick_paper', title: 'Papel grosso travando', keywords: ['papel grosso'], steps: ['Use bandeja manual','Selecione cartão no driver'] },
+      { id: 'skew_feed', title: 'Papel puxando torto', keywords: ['puxando torto'], steps: ['Ajuste guia lateral da bandeja'] },
+      { id: 'no_paper', title: 'Erro: Sem papel', keywords: ['sem papel'], steps: ['Recoloque papel','Verifique sensores'] },
+      { id: 'duplex_jam', title: 'Enrosco no duplex', keywords: ['duplex'], steps: ['Limpe roletes traseiros com pano úmido'] },
+      { id: 'torn_paper', title: 'Papel rasgado dentro', keywords: ['rasgado'], steps: ['Remova pedaços restantes com cuidado'] },
+      { id: 'toner_low', title: 'Mensagem toner baixo', keywords: ['toner baixo'], steps: ['Retire e recoloque','Agite levemente'] },
+      { id: 'toner_smear', title: 'Toner borrando', keywords: ['borrando'], steps: ['Limpe fusor','Troque cartucho'] },
+      { id: 'black_page', title: 'Folha toda preta', keywords: ['toda preta'], steps: ['Substitua cartucho'] },
+      { id: 'white_lines', title: 'Falha linhas brancas', keywords: ['linhas brancas'], steps: ['Agite cartucho','Troque se persistir'] },
+      { id: 'cart_not_recognized', title: 'Cartucho não reconhecido', keywords: ['cartucho não reconhecido'], steps: ['Retire, limpe contatos','Recoloque cartucho'] },
+      { id: 'incompatible_cart', title: 'Cartucho incompatível', keywords: ['cartucho incompatível'], steps: ['Verifique compatibilidade'] },
+      { id: 'faint_print', title: 'Impressão desbotada', keywords: ['clara','desbotada'], steps: ['Ajuste densidade','Troque toner'] },
+      { id: 'repeated_marks', title: 'Manchas repetidas', keywords: ['manchas'], steps: ['Troque fusor ou cilindro'] },
+      { id: 'replace_cart', title: 'Erro substituir cartucho', keywords: ['substituir cartucho'], steps: ['Reset impressora','Troque chip'] },
+      { id: 'toner_leak', title: 'Vazamento toner', keywords: ['vazamento'], steps: ['Limpe pó','Substitua cartucho'] },
+      { id: 'wifi_fail', title: 'Não conecta Wi-Fi', keywords: ['wifi','sem rede'], steps: ['Reconfigure Wi-Fi','Use software oficial'] },
+      { id: 'usb_fail', title: 'Cabo USB não reconhecido', keywords: ['usb'], steps: ['Troque porta','Troque cabo'] },
+      { id: 'lan_fail', title: 'Erro rede cabeada', keywords: ['rede cabeada'], steps: ['Verifique cabo RJ45'] },
+      { id: 'ip_dup', title: 'IP duplicado', keywords: ['ip duplicado'], steps: ['Configure IP fixo ou DHCP'] },
+      { id: 'driver_missing', title: 'Driver não instalado', keywords: ['driver'], steps: ['Baixe do site oficial'] },
+      { id: 'share_fail', title: 'Erro compartilhamento', keywords: ['compartilhamento'], steps: ['Verifique permissões no Windows'] },
+      { id: 'mobile_fail', title: 'Erro impressão móvel', keywords: ['mobile'], steps: ['Instale HP Smart ou Samsung Mobile Print'] },
+      { id: 'wifi_loss', title: 'Perda Wi-Fi após desligar', keywords: ['perda wifi'], steps: ['Reserve IP fixo no roteador'] },
+      { id: 'ping_fail', title: 'Ping responde mas não imprime', keywords: ['ping'], steps: ['Reinicie spooler de impressão'] },
+      { id: 'offline', title: 'Erro: Impressora offline', keywords: ['offline'], steps: ['Retire e adicione impressora'] },
+      { id: 'roller_fail', title: 'Rolinho não puxa papel', keywords: ['rolinho'], steps: ['Limpe ou troque rolete'] },
+      { id: 'fuser_hot', title: 'Fusor superaquecendo', keywords: ['fusor quente'], steps: ['Desligue e aguarde esfriar'] },
+      { id: 'noise', title: 'Ruído estranho', keywords: ['ruído'], steps: ['Verifique objeto preso'] },
+      { id: 'scanner_fail', title: 'Scanner não funciona', keywords: ['scanner'], steps: ['Verifique cabo flat','Atualize driver TWAIN'] },
+      { id: 'adf_fail', title: 'ADF não puxa originais', keywords: ['adf'], steps: ['Limpe roletes com álcool isopropílico'] },
+      { id: 'cover_open', title: 'Erro tampa aberta', keywords: ['tampa aberta'], steps: ['Verifique travas e feche'] },
+      { id: 'blinking', title: 'Luz piscando sem imprimir', keywords: ['luz piscando'], steps: ['Verifique painel e atolamentos ocultos'] },
+      { id: 'overheat', title: 'Erro superaquecimento fusor', keywords: ['sobre aquecimento'], steps: ['Desligue e aguarde 15min'] },
+      { id: 'panel_freeze', title: 'Painel travado', keywords: ['painel travado'], steps: ['Desligue da tomada por 1 min'] },
+      { id: 'maint_parts', title: 'Erro peças manutenção', keywords: ['kit fusão','roletes'], steps: ['Reset de manutenção no menu técnico'] },
+      { id: 'queue', title: 'Fila de impressão travada', keywords: ['fila','travada'], steps: ['Limpe spooler em serviços do Windows'] },
+      { id: 'strange_chars', title: 'Imprime códigos estranhos', keywords: ['códigos','estranhos'], steps: ['Instale driver PCL ou PS'] },
+      { id: 'slow_print', title: 'Documento demora a imprimir', keywords: ['demora'], steps: ['Use driver dedicado'] },
+      { id: 'duplex_lost', title: 'Configuração duplex sumiu', keywords: ['duplex sumiu'], steps: ['Reinstale driver'] },
+      { id: 'margin_fail', title: 'Imprime fora da margem', keywords: ['fora da margem'], steps: ['Ajuste formato de papel'] },
+      { id: 'wrong_port', title: 'Erro porta incorreta', keywords: ['porta'], steps: ['Redefina porta de comunicação'] },
+      { id: 'scan_email', title: 'Não digitaliza p/ e-mail', keywords: ['email'], steps: ['Configure servidor SMTP'] },
+      { id: 'scan_network', title: 'Erro salvar digitalização', keywords: ['digitalização'], steps: ['Configure pasta compartilhada'] },
+      { id: 'pdf_slow', title: 'PDF muito lento', keywords: ['pdf lento'], steps: ['Ative imprimir como imagem no Adobe Reader'] },
+      { id: 'fw_outdated', title: 'Firmware desatualizado', keywords: ['firmware'], steps: ['Atualize firmware no site oficial'] }
     ];
-    /* ====================================== */
 
-    // util
-    function getQueryParam(name){
-      const url = new URL(window.location.href);
-      return url.searchParams.get(name);
-    }
+    function getQueryParam(name){ try{ const url = new URL(window.location.href); return url.searchParams.get(name); }catch(e){ return null; } }
 
     function populateIssueSelect(){
       const sel = document.getElementById('issueSelect');
-      KB.forEach(k => {
-        const opt = document.createElement('option');
-        opt.value = k.id;
-        opt.textContent = k.title;
-        sel.appendChild(opt);
-      });
+      KB.forEach(k => { const opt = document.createElement('option'); opt.value = k.id; opt.textContent = k.title; sel.appendChild(opt); });
       const other = document.createElement('option'); other.value='other'; other.textContent='Outro (digitar)'; sel.appendChild(other);
     }
 
-    function findKBById(id){return KB.find(k=>k.id===id);}    
-    function findMatches(text){
-      if(!text) return [];
-      const t = text.toLowerCase();
-      return KB.filter(k=>k.keywords.some(w => t.includes(w) || t.includes(w.replace(' ','')) ) || k.title.toLowerCase().includes(t));
-    }
+    function findKBById(id){ return KB.find(k=>k.id===id); }
+    function findMatches(text){ if(!text) return []; const t=text.toLowerCase(); return KB.filter(k => k.keywords.some(w=>t.includes(w))); }
 
-    // UI
-    const issueSelect = document.getElementById('issueSelect');
-    const customIssue = document.getElementById('customIssue');
-    const searchBtn = document.getElementById('searchBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const result = document.getElementById('result');
-    const matchTitle = document.getElementById('matchTitle');
-    const matchSteps = document.getElementById('matchSteps');
-    const callActions = document.getElementById('callActions');
-    const openSN = document.getElementById('openSN');
-    const resolvedYes = document.getElementById('resolvedYes');
-    const resolvedNo = document.getElementById('resolvedNo');
-    const ticketInput = document.getElementById('ticketInput');
-    const copyMsg = document.getElementById('copyMsg');
-    const openTeams = document.getElementById('openTeams');
-    const logEvent = document.getElementById('logEvent');
-    const obsInput = document.getElementById('obs');
+    const issueSelect=document.getElementById('issueSelect');
+    const customIssue=document.getElementById('customIssue');
+    const searchBtn=document.getElementById('searchBtn');
+    const clearBtn=document.getElementById('clearBtn');
+    const result=document.getElementById('result');
+    const matchTitle=document.getElementById('matchTitle');
+    const matchSteps=document.getElementById('matchSteps');
+    const callActions=document.getElementById('callActions');
+    const openSN=document.getElementById('openSN');
+    const resolvedYes=document.getElementById('resolvedYes');
+    const resolvedNo=document.getElementById('resolvedNo');
+    const obsInput=document.getElementById('obs');
+    const printerInfoElem=document.getElementById('printerInfo');
 
-    let currentMatch = null;
-    let currentPrinter = getQueryParam('printer') || '';
-
-    document.getElementById('printerInfo').textContent = currentPrinter ? ('Impressora: ' + currentPrinter) : 'ID da impressora não informado (link QR sem ?printer=).';
+    let currentMatch=null;
+    let currentPrinter=getQueryParam('printer')||'';
+    if(currentPrinter){ printerInfoElem.textContent='Impressora: '+currentPrinter; } else { printerInfoElem.style.display='none'; }
 
     populateIssueSelect();
 
-    searchBtn.addEventListener('click', ()=>{
-      const selVal = issueSelect.value;
-      const custom = customIssue.value.trim();
-      let matches = [];
-      if(selVal && selVal!=='other'){
-        const k = findKBById(selVal);
-        if(k) matches = [k];
-      } else if(custom){
-        matches = findMatches(custom);
-      }
-
-      if(matches.length===0 && custom){
-        // criar sugestão genérica
-        matchTitle.textContent = 'Solução sugerida (base genérica)';
-        matchSteps.innerHTML = '<div class="small">Não encontramos uma correspondência direta. Tente estas ações gerais:</div><ol class="steps"><li>Desligue a impressora e aguarde 10s.</li><li>Verifique papel, toner e cabos.</li><li>Reinicie o trabalho de impressão pelo computador.</li></ol>';
-        currentMatch = null;
-      } else if(matches.length>0){
-        const m = matches[0];
-        matchTitle.textContent = m.title;
-        matchSteps.innerHTML = '<ol class="steps">' + m.steps.map(s=>'<li>'+s+'</li>').join('') + '</ol>';
-        currentMatch = m;
-      } else {
-        matchTitle.textContent = '';
-        matchSteps.innerHTML = '';
-        currentMatch = null;
-      }
-
-      result.style.display = 'block';
-      callActions.style.display = 'none';
+    searchBtn.addEventListener('click',()=>{
+      const selVal=issueSelect.value; const custom=(customIssue.value||'').trim(); let matches=[];
+      if(selVal&&selVal!=='other'){ const k=findKBById(selVal); if(k) matches=[k]; }
+      else if(custom){ matches=findMatches(custom); }
+      if(matches.length>0){ const m=matches[0]; matchTitle.textContent=m.title; matchSteps.innerHTML='<ol class="steps">'+m.steps.map(s=>'<li>'+s+'</li>').join('')+'</ol>'; currentMatch=m; }
+      else if(custom){ matchTitle.textContent='Solução genérica'; matchSteps.innerHTML='<li>Desligue a impressora</li><li>Verifique cabos e papel</li>'; }
+      result.style.display='block'; callActions.style.display='none';
     });
 
-    clearBtn.addEventListener('click', ()=>{ issueSelect.value=''; customIssue.value=''; result.style.display='none'; currentMatch=null; });
-
-    resolvedYes.addEventListener('click', ()=>{
-      alert('Que bom! Marquei como resolvido localmente. Se quiser registrar para métricas, use "Registrar evento".');
-      // opcional: abrir link de log já preenchido
-    });
-
-    resolvedNo.addEventListener('click', ()=>{ callActions.style.display='block'; });
-
-    openSN.addEventListener('click', ()=>{
-      // construir short description e description com base nas infos
-      const issueText = customIssue.value.trim() || (currentMatch?currentMatch.title:'Problema informado');
-      const shortDesc = 'Chamado - ' + (currentPrinter || 'IMP_NA') + ' - ' + issueText;
-      const longDesc = 'Impressora: ' + (currentPrinter || 'NA') + '\nProblema: ' + issueText + '\nObservação: ' + (obsInput.value || '') + '\nSoluções tentadas: ' + (currentMatch?currentMatch.steps.join(' | '):'Nenhuma/Genérica');
-
-      // Tente abrir a URL do ServiceNow com parâmetros (atenção: nomes de parâmetros podem variar por instância)
-      const url = SERVICENOW_URL + '?sysparm_stack=no&short_description=' + encodeURIComponent(shortDesc) + '&description=' + encodeURIComponent(longDesc);
-      window.open(url, '_blank');
-
-      // Se LOG_FORM_PREFILLED_URL estiver configurado, também abrir para registrar automaticamente o evento (opcional)
-      if(LOG_FORM_PREFILLED_URL){
-        const logUrl = LOG_FORM_PREFILLED_URL.replace('{printer}', encodeURIComponent(currentPrinter || '')).replace('{issue}', encodeURIComponent(issueText)).replace('{resolved}', encodeURIComponent('Não')).replace('{ticket}', encodeURIComponent(''));
-        window.open(logUrl, '_blank');
-      }
-
-      alert('Ao criar o chamado no ServiceNow, copie o número do incidente e cole no campo "Número do chamado" aqui para compartilhar com o técnico.');
-    });
-
-    logEvent.addEventListener('click', ()=>{
-      if(!LOG_FORM_PREFILLED_URL){ alert('URL de log não configurada. Edite o arquivo e configure LOG_FORM_PREFILLED_URL com o link pré-preenchido do Google Forms.'); return; }
-      const issueText = customIssue.value.trim() || (currentMatch?currentMatch.title:'Problema informado');
-      const logUrl = LOG_FORM_PREFILLED_URL.replace('{printer}', encodeURIComponent(currentPrinter || '')).replace('{issue}', encodeURIComponent(issueText)).replace('{resolved}', encodeURIComponent('Não')).replace('{ticket}', encodeURIComponent(ticketInput.value||''));
-      window.open(logUrl, '_blank');
-    });
-
-    copyMsg.addEventListener('click', async ()=>{
-      const ticket = ticketInput.value.trim();
-      if(!ticket){ alert('Cole o número do chamado antes de copiar a mensagem.'); return; }
-      const issueText = customIssue.value.trim() || (currentMatch?currentMatch.title:'Problema informado');
-      const msg = `Chamado ${ticket} - Impressora ${currentPrinter || 'NA'} - ${issueText}. Por favor, verificar.`;
-      try{ await navigator.clipboard.writeText(msg); alert('Mensagem copiada. Cole no chat do Teams com o técnico local.'); }catch(e){ alert('Não foi possível copiar automaticamente. Selecione e copie: ' + msg); }
-    });
-
-    openTeams.addEventListener('click', ()=>{
-      // abrir Microsoft Teams na web. Para abrir chat direto com usuário, substitua o link com deep-link fornecido pelo time de TI. Aqui abrimos a homepage do Teams.
-      window.open('https://teams.microsoft.com/', '_blank');
-    });
-
-    // on load: prefill customIssue with query param "issue" se houver
-    (function(){
-      const qIssue = getQueryParam('issue');
-      if(qIssue) customIssue.value = decodeURIComponent(qIssue);
-    })();
+    clearBtn.addEventListener('click',()=>{ issueSelect.value=''; customIssue.value=''; result.style.display='none'; currentMatch=null; });
+    resolvedYes.addEventListener('click',()=>{ alert('Que bom! Marcado como resolvido.'); });
+    resolvedNo.addEventListener('click',()=>{ callActions.style.display='block'; obsInput.focus(); });
+    openSN.addEventListener('click',()=>{ const issueText=(customIssue.value||'').trim()||(currentMatch?currentMatch.title:'Problema informado'); const shortDesc=`Chamado - ${currentPrinter||'IMP_NA'} - ${issueText}`; const longDesc=`Impressora: ${currentPrinter||'NA'}\nProblema: ${issueText}\nObs: ${obsInput.value||''}`; const url=SERVICENOW_URL+`?short_description=`+encodeURIComponent(shortDesc)+`&description=`+encodeURIComponent(longDesc); window.open(url,'_blank'); });
   </script>
 </body>
 </html>
