@@ -1,8 +1,3 @@
-<!--
-Suporte-QR-Impressoras.html
-Versão: Completa (single-file) — inclui 50 problemas
--->
-
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -10,173 +5,896 @@ Versão: Completa (single-file) — inclui 50 problemas
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Suporte Rápido - Impressora</title>
   <style>
-    :root{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
-    body{margin:0;padding:16px;background:#f4f6f8;color:#12202b}
-    .card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 6px 18px rgba(16,24,40,0.08);max-width:720px;margin:12px auto}
-    h1{font-size:18px;margin:0 0 8px}
-    p.lead{margin:0 0 16px;color:#334155}
-    label{font-weight:600;font-size:13px;display:block;margin:12px 0 6px}
-    select,input[type=text],textarea{width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px}
-    button{padding:12px 14px;border-radius:10px;border:0;font-weight:700;background:#0b63d6;color:#fff;font-size:15px;cursor:pointer}
-    button.ghost{background:transparent;color:#0b63d6;border:1px solid #cfe0ff}
-    .solution{background:#f8fafc;padding:12px;border-radius:8px;margin-top:10px}
-    .steps{margin:8px 0;padding-left:18px}
-    .row{display:flex;gap:8px}
-    .small{font-size:13px;color:#475569}
-    .muted{color:#64748b;font-size:13px}
-    .footer{font-size:13px;color:#475569;margin-top:12px}
-    .center{text-align:center}
-    @media (max-width:520px){.row{flex-direction:column}}
-    footer{margin-top:18px;text-align:center;color:#475569;font-size:13px}
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #dbeafe;
+      --secondary: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --border-focus: #3b82f6;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      --radius: 8px;
+      --radius-lg: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--background);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 24px 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+
+    .header h1 {
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .header p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 15px;
+    }
+
+    .printer-info {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border-left: 4px solid var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .form-select, .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 16px;
+      background: var(--surface);
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .form-select:focus, .form-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 12px center;
+      background-repeat: no-repeat;
+      background-size: 16px;
+      padding-right: 40px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 48px;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text-secondary);
+      border: 2px solid var(--border);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--background);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn-group .btn {
+      flex: 1;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+    }
+
+    .solution-card {
+      background: linear-gradient(135deg, var(--primary-light) 0%, #e0f2fe 100%);
+      border-left: 4px solid var(--primary);
+      margin-top: 20px;
+    }
+
+    .solution-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 12px;
+    }
+
+    .solution-steps {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .solution-steps li {
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .footer {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-top: 32px;
+      padding: 16px 0;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin: 16px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: var(--shadow-xl);
+      transform: scale(0.9) translateY(20px);
+      transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active .modal {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-header {
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .modal-content {
+      margin-bottom: 20px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .modal-actions .btn {
+      min-width: 80px;
+    }
+
+    .success-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: white;
+      font-size: 24px;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #ffffff40;
+      border-radius: 50%;
+      border-top-color: #ffffff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .container {
+        padding: 12px;
+      }
+
+      .header {
+        padding: 20px 16px;
+      }
+
+      .btn-group {
+        flex-direction: column;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+
+      .modal {
+        margin: 12px;
+      }
+    }
+
+    /* Animation for solution card */
+    .solution-card {
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Focus states for accessibility */
+    .btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Toast notification styles */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-primary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1001;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Suporte rápido — Impressora</h1>
-    <p class="lead">Escaneie o QR na impressora, verifique a sugestão e, se não resolver, abra o chamado no ServiceNow pelo seu celular.</p>
-
-    <div id="printerInfo" class="muted" aria-live="polite"></div>
-
-    <label for="issueSelect">Selecione o problema (ou digite abaixo)</label>
-    <select id="issueSelect">
-      <option value="">— escolher —</option>
-    </select>
-
-    <label for="customIssue">Ou descreva o problema (texto livre)</label>
-    <input id="customIssue" type="text" placeholder="Ex: Impressora imprimindo borrado, erro 50.2, atolamento..." />
-
-    <div style="margin-top:10px;" class="row">
-      <button id="searchBtn">Ver soluções</button>
-      <button id="clearBtn" class="ghost">Limpar</button>
+  <div class="container">
+    <div class="header">
+      <h1>Suporte Rápido</h1>
+      <p>Escaneie o QR na impressora, verifique a sugestão e, se não resolver, abra o chamado no ServiceNow pelo seu celular.</p>
     </div>
 
-    <div id="result" style="display:none">
-      <div class="solution">
-        <div class="small" id="matchTitle"></div>
-        <div id="matchSteps" class="steps"></div>
-        <div style="margin-top:8px" class="row">
-          <button id="resolvedYes" class="ghost">Resolvido</button>
-          <button id="resolvedNo">Não resolveu — Abrir chamado</button>
-        </div>
+    <div id="printerInfo" class="printer-info hidden"></div>
+
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label" for="issueSelect">Selecione o problema</label>
+        <select id="issueSelect" class="form-select">
+          <option value="">— escolher —</option>
+        </select>
       </div>
 
-      <div id="callActions" style="display:none;margin-top:12px">
-        <label class="small">Observação (opcional)</label>
-        <div class="row" style="margin-bottom:8px">
-          <input id="obs" type="text" placeholder="Observação (ex: usuário preferiu não tentar)" />
-        </div>
-        <div class="row">
-          <button id="openSN">Abrir chamado no ServiceNow</button>
-        </div>
+      <div class="form-group">
+        <label class="form-label" for="customIssue">Ou descreva o problema</label>
+        <input id="customIssue" type="text" class="form-input" 
+               placeholder="Ex: Impressora imprimindo borrado, erro 50.2, atolamento..." />
       </div>
 
+      <div class="btn-group">
+        <button id="searchBtn" class="btn btn-primary">Ver soluções</button>
+        <button id="clearBtn" class="btn btn-secondary">Limpar</button>
+      </div>
     </div>
 
+    <div id="solutionCard" class="card solution-card hidden">
+      <div class="solution-title" id="solutionTitle"></div>
+      <ol class="solution-steps" id="solutionSteps"></ol>
+      
+      <div class="btn-group">
+        <button id="resolvedBtn" class="btn btn-success">Resolvido</button>
+        <button id="notResolvedBtn" class="btn btn-danger">Não resolveu</button>
+      </div>
+    </div>
+
+    <div id="ticketCard" class="card hidden">
+      <div class="form-group">
+        <label class="form-label" for="observationInput">Observação (opcional)</label>
+        <input id="observationInput" type="text" class="form-input" 
+               placeholder="Ex: usuário preferiu não tentar a solução..." />
+      </div>
+      
+      <button id="openTicketBtn" class="btn btn-primary" style="width: 100%;">
+        <span class="btn-text">Abrir chamado no ServiceNow</span>
+        <span class="loading hidden"></span>
+      </button>
+    </div>
   </div>
 
-  <footer>Desenvolvido por Phablo Salazar - 2025</footer>
+  <footer class="footer">
+    Desenvolvido por Phablo Salazar - 2025
+  </footer>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal-overlay">
+    <div class="modal">
+      <div class="success-icon">✓</div>
+      <div class="modal-header">
+        <h3 class="modal-title">Problema resolvido!</h3>
+      </div>
+      <div class="modal-content">
+        Que ótimo! O problema foi marcado como resolvido. Agradecemos por usar nosso sistema de suporte.
+      </div>
+      <div class="modal-actions">
+        <button id="closeSuccessModal" class="btn btn-primary">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket Modal -->
+  <div id="ticketModal" class="modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Abrir chamado</h3>
+      </div>
+      <div class="modal-content">
+        <p>Você será redirecionado para o ServiceNow para abrir um chamado técnico. Todas as informações do problema serão incluídas automaticamente.</p>
+        <p><strong>Deseja continuar?</strong></p>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelTicket" class="btn btn-secondary">Cancelar</button>
+        <button id="confirmTicket" class="btn btn-primary">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast"></div>
 
   <script>
     const SERVICENOW_URL = 'https://suzanoprod.service-now.com/suzano_ti_vc?id=sc_cat_item&sys_id=c3df8aeddb89e74439e4a19b8a96197d';
 
     // Base com 50 problemas comuns
     const KB = [
-      { id: 'jam', title: 'Atolamento na bandeja', keywords: ['atolamento','bandeja','papel preso'], steps: ['Retire o papel','Alinhe as folhas','Não ultrapasse a guia'] },
-      { id: 'fuser_jam', title: 'Papel preso no fusor', keywords: ['fusor'], steps: ['Abra tampa traseira','Puxe suavemente','Remova papel'] },
-      { id: 'double_feed', title: 'Alimentação dupla', keywords: ['duas folhas','alimentação dupla'], steps: ['Retire e ventile o papel','Ajuste guias laterais'] },
-      { id: 'moist_paper', title: 'Papel úmido enrugando', keywords: ['papel úmido','molhado'], steps: ['Troque por papel seco','Guarde resma fechada'] },
-      { id: 'not_recognized', title: 'Papel não reconhecido', keywords: ['papel não reconhecido'], steps: ['Ajuste tipo de papel no driver'] },
-      { id: 'thick_paper', title: 'Papel grosso travando', keywords: ['papel grosso'], steps: ['Use bandeja manual','Selecione cartão no driver'] },
-      { id: 'skew_feed', title: 'Papel puxando torto', keywords: ['puxando torto'], steps: ['Ajuste guia lateral da bandeja'] },
-      { id: 'no_paper', title: 'Erro: Sem papel', keywords: ['sem papel'], steps: ['Recoloque papel','Verifique sensores'] },
-      { id: 'duplex_jam', title: 'Enrosco no duplex', keywords: ['duplex'], steps: ['Limpe roletes traseiros com pano úmido'] },
-      { id: 'torn_paper', title: 'Papel rasgado dentro', keywords: ['rasgado'], steps: ['Remova pedaços restantes com cuidado'] },
-      { id: 'toner_low', title: 'Mensagem toner baixo', keywords: ['toner baixo'], steps: ['Retire e recoloque','Agite levemente'] },
-      { id: 'toner_smear', title: 'Toner borrando', keywords: ['borrando'], steps: ['Limpe fusor','Troque cartucho'] },
-      { id: 'black_page', title: 'Folha toda preta', keywords: ['toda preta'], steps: ['Substitua cartucho'] },
-      { id: 'white_lines', title: 'Falha linhas brancas', keywords: ['linhas brancas'], steps: ['Agite cartucho','Troque se persistir'] },
-      { id: 'cart_not_recognized', title: 'Cartucho não reconhecido', keywords: ['cartucho não reconhecido'], steps: ['Retire, limpe contatos','Recoloque cartucho'] },
-      { id: 'incompatible_cart', title: 'Cartucho incompatível', keywords: ['cartucho incompatível'], steps: ['Verifique compatibilidade'] },
-      { id: 'faint_print', title: 'Impressão desbotada', keywords: ['clara','desbotada'], steps: ['Ajuste densidade','Troque toner'] },
-      { id: 'repeated_marks', title: 'Manchas repetidas', keywords: ['manchas'], steps: ['Troque fusor ou cilindro'] },
-      { id: 'replace_cart', title: 'Erro substituir cartucho', keywords: ['substituir cartucho'], steps: ['Reset impressora','Troque chip'] },
-      { id: 'toner_leak', title: 'Vazamento toner', keywords: ['vazamento'], steps: ['Limpe pó','Substitua cartucho'] },
-      { id: 'wifi_fail', title: 'Não conecta Wi-Fi', keywords: ['wifi','sem rede'], steps: ['Reconfigure Wi-Fi','Use software oficial'] },
-      { id: 'usb_fail', title: 'Cabo USB não reconhecido', keywords: ['usb'], steps: ['Troque porta','Troque cabo'] },
-      { id: 'lan_fail', title: 'Erro rede cabeada', keywords: ['rede cabeada'], steps: ['Verifique cabo RJ45'] },
-      { id: 'ip_dup', title: 'IP duplicado', keywords: ['ip duplicado'], steps: ['Configure IP fixo ou DHCP'] },
-      { id: 'driver_missing', title: 'Driver não instalado', keywords: ['driver'], steps: ['Baixe do site oficial'] },
-      { id: 'share_fail', title: 'Erro compartilhamento', keywords: ['compartilhamento'], steps: ['Verifique permissões no Windows'] },
-      { id: 'mobile_fail', title: 'Erro impressão móvel', keywords: ['mobile'], steps: ['Instale HP Smart ou Samsung Mobile Print'] },
-      { id: 'wifi_loss', title: 'Perda Wi-Fi após desligar', keywords: ['perda wifi'], steps: ['Reserve IP fixo no roteador'] },
-      { id: 'ping_fail', title: 'Ping responde mas não imprime', keywords: ['ping'], steps: ['Reinicie spooler de impressão'] },
-      { id: 'offline', title: 'Erro: Impressora offline', keywords: ['offline'], steps: ['Retire e adicione impressora'] },
-      { id: 'roller_fail', title: 'Rolinho não puxa papel', keywords: ['rolinho'], steps: ['Limpe ou troque rolete'] },
-      { id: 'fuser_hot', title: 'Fusor superaquecendo', keywords: ['fusor quente'], steps: ['Desligue e aguarde esfriar'] },
-      { id: 'noise', title: 'Ruído estranho', keywords: ['ruído'], steps: ['Verifique objeto preso'] },
-      { id: 'scanner_fail', title: 'Scanner não funciona', keywords: ['scanner'], steps: ['Verifique cabo flat','Atualize driver TWAIN'] },
-      { id: 'adf_fail', title: 'ADF não puxa originais', keywords: ['adf'], steps: ['Limpe roletes com álcool isopropílico'] },
-      { id: 'cover_open', title: 'Erro tampa aberta', keywords: ['tampa aberta'], steps: ['Verifique travas e feche'] },
-      { id: 'blinking', title: 'Luz piscando sem imprimir', keywords: ['luz piscando'], steps: ['Verifique painel e atolamentos ocultos'] },
-      { id: 'overheat', title: 'Erro superaquecimento fusor', keywords: ['sobre aquecimento'], steps: ['Desligue e aguarde 15min'] },
-      { id: 'panel_freeze', title: 'Painel travado', keywords: ['painel travado'], steps: ['Desligue da tomada por 1 min'] },
-      { id: 'maint_parts', title: 'Erro peças manutenção', keywords: ['kit fusão','roletes'], steps: ['Reset de manutenção no menu técnico'] },
-      { id: 'queue', title: 'Fila de impressão travada', keywords: ['fila','travada'], steps: ['Limpe spooler em serviços do Windows'] },
-      { id: 'strange_chars', title: 'Imprime códigos estranhos', keywords: ['códigos','estranhos'], steps: ['Instale driver PCL ou PS'] },
-      { id: 'slow_print', title: 'Documento demora a imprimir', keywords: ['demora'], steps: ['Use driver dedicado'] },
-      { id: 'duplex_lost', title: 'Configuração duplex sumiu', keywords: ['duplex sumiu'], steps: ['Reinstale driver'] },
-      { id: 'margin_fail', title: 'Imprime fora da margem', keywords: ['fora da margem'], steps: ['Ajuste formato de papel'] },
-      { id: 'wrong_port', title: 'Erro porta incorreta', keywords: ['porta'], steps: ['Redefina porta de comunicação'] },
-      { id: 'scan_email', title: 'Não digitaliza p/ e-mail', keywords: ['email'], steps: ['Configure servidor SMTP'] },
-      { id: 'scan_network', title: 'Erro salvar digitalização', keywords: ['digitalização'], steps: ['Configure pasta compartilhada'] },
-      { id: 'pdf_slow', title: 'PDF muito lento', keywords: ['pdf lento'], steps: ['Ative imprimir como imagem no Adobe Reader'] },
-      { id: 'fw_outdated', title: 'Firmware desatualizado', keywords: ['firmware'], steps: ['Atualize firmware no site oficial'] }
+      { id: 'jam', title: 'Atolamento na bandeja', keywords: ['atolamento','bandeja','papel preso'], steps: ['Retire o papel com cuidado','Alinhe as folhas na bandeja','Não ultrapasse a guia de papel'] },
+      { id: 'fuser_jam', title: 'Papel preso no fusor', keywords: ['fusor'], steps: ['Abra a tampa traseira','Puxe o papel suavemente','Remova todos os pedaços'] },
+      { id: 'double_feed', title: 'Alimentação dupla', keywords: ['duas folhas','alimentação dupla'], steps: ['Retire e ventile o papel','Ajuste as guias laterais','Recoloque o papel alinhado'] },
+      { id: 'moist_paper', title: 'Papel úmido enrugando', keywords: ['papel úmido','molhado'], steps: ['Troque por papel seco','Guarde a resma fechada','Evite locais úmidos'] },
+      { id: 'not_recognized', title: 'Papel não reconhecido', keywords: ['papel não reconhecido'], steps: ['Ajuste o tipo de papel no driver','Verifique configurações de bandeja'] },
+      { id: 'thick_paper', title: 'Papel grosso travando', keywords: ['papel grosso'], steps: ['Use a bandeja manual','Selecione cartão no driver','Ajuste as guias'] },
+      { id: 'skew_feed', title: 'Papel puxando torto', keywords: ['puxando torto'], steps: ['Ajuste a guia lateral da bandeja','Verifique alinhamento do papel'] },
+      { id: 'no_paper', title: 'Erro: Sem papel', keywords: ['sem papel'], steps: ['Recoloque o papel na bandeja','Verifique sensores de papel'] },
+      { id: 'duplex_jam', title: 'Enrosco no duplex', keywords: ['duplex'], steps: ['Limpe os roletes traseiros','Use pano úmido não felpudo'] },
+      { id: 'torn_paper', title: 'Papel rasgado dentro', keywords: ['rasgado'], steps: ['Remova todos os pedaços','Verifique se não restou papel'] },
+      { id: 'toner_low', title: 'Mensagem toner baixo', keywords: ['toner baixo'], steps: ['Retire e recoloque o cartucho','Agite levemente o toner'] },
+      { id: 'toner_smear', title: 'Toner borrando', keywords: ['borrando'], steps: ['Limpe o fusor cuidadosamente','Considere trocar o cartucho'] },
+      { id: 'black_page', title: 'Folha toda preta', keywords: ['toda preta'], steps: ['Substitua o cartucho imediatamente','Verifique vazamentos'] },
+      { id: 'white_lines', title: 'Linhas brancas na impressão', keywords: ['linhas brancas'], steps: ['Agite o cartucho de toner','Troque se o problema persistir'] },
+      { id: 'cart_not_recognized', title: 'Cartucho não reconhecido', keywords: ['cartucho não reconhecido'], steps: ['Retire e limpe os contatos','Recoloque o cartucho firmemente'] },
+      { id: 'incompatible_cart', title: 'Cartucho incompatível', keywords: ['cartucho incompatível'], steps: ['Verifique o modelo correto','Use apenas cartuchos originais'] },
+      { id: 'faint_print', title: 'Impressão desbotada', keywords: ['clara','desbotada'], steps: ['Ajuste a densidade de impressão','Considere trocar o toner'] },
+      { id: 'repeated_marks', title: 'Manchas repetidas', keywords: ['manchas'], steps: ['Problema no fusor ou cilindro','Solicite manutenção técnica'] },
+      { id: 'replace_cart', title: 'Erro substituir cartucho', keywords: ['substituir cartucho'], steps: ['Faça reset da impressora','Verifique o chip do cartucho'] },
+      { id: 'toner_leak', title: 'Vazamento de toner', keywords: ['vazamento'], steps: ['Limpe o pó com cuidado','Substitua o cartucho defeituoso'] },
+      { id: 'wifi_fail', title: 'Não conecta Wi-Fi', keywords: ['wifi','sem rede'], steps: ['Reconfigure a rede Wi-Fi','Use o software oficial da marca'] },
+      { id: 'usb_fail', title: 'Cabo USB não reconhecido', keywords: ['usb'], steps: ['Troque a porta USB','Teste com outro cabo'] },
+      { id: 'lan_fail', title: 'Erro rede cabeada', keywords: ['rede cabeada'], steps: ['Verifique o cabo RJ45','Teste em outra porta de rede'] },
+      { id: 'ip_dup', title: 'IP duplicado', keywords: ['ip duplicado'], steps: ['Configure IP fixo único','Ou use DHCP automático'] },
+      { id: 'driver_missing', title: 'Driver não instalado', keywords: ['driver'], steps: ['Baixe do site oficial da marca','Instale a versão mais recente'] },
+      { id: 'share_fail', title: 'Erro compartilhamento', keywords: ['compartilhamento'], steps: ['Verifique permissões no Windows','Configure compartilhamento corretamente'] },
+      { id: 'mobile_fail', title: 'Erro impressão móvel', keywords: ['mobile'], steps: ['Instale o app oficial','HP Smart ou Samsung Mobile Print'] },
+      { id: 'wifi_loss', title: 'Perda Wi-Fi após desligar', keywords: ['perda wifi'], steps: ['Reserve IP fixo no roteador','Configure DNS estático'] },
+      { id: 'ping_fail', title: 'Ping responde mas não imprime', keywords: ['ping'], steps: ['Reinicie o spooler de impressão','Verifique fila de impressão'] },
+      { id: 'offline', title: 'Impressora offline', keywords: ['offline'], steps: ['Remova e adicione novamente','Verifique conexão física'] },
+      { id: 'roller_fail', title: 'Rolinho não puxa papel', keywords: ['rolinho'], steps: ['Limpe os roletes','Substitua se necessário'] },
+      { id: 'fuser_hot', title: 'Fusor superaquecendo', keywords: ['fusor quente'], steps: ['Desligue e aguarde esfriar','Verifique ventilação'] },
+      { id: 'noise', title: 'Ruído estranho', keywords: ['ruído'], steps: ['Verifique objetos presos','Desligue se muito alto'] },
+      { id: 'scanner_fail', title: 'Scanner não funciona', keywords: ['scanner'], steps: ['Verifique cabo flat interno','Atualize driver TWAIN'] },
+      { id: 'adf_fail', title: 'ADF não puxa originais', keywords: ['adf'], steps: ['Limpe roletes com álcool','Verifique sensor de papel'] },
+      { id: 'cover_open', title: 'Erro tampa aberta', keywords: ['tampa aberta'], steps: ['Verifique todas as travas','Feche firmemente'] },
+      { id: 'blinking', title: 'Luz piscando sem imprimir', keywords: ['luz piscando'], steps: ['Consulte manual do usuário','Verifique atolamentos ocultos'] },
+      { id: 'overheat', title: 'Erro superaquecimento fusor', keywords: ['sobre aquecimento'], steps: ['Desligue por 15 minutos','Melhore ventilação do local'] },
+      { id: 'panel_freeze', title: 'Painel travado', keywords: ['painel travado'], steps: ['Desligue da tomada por 1 minuto','Ligue novamente'] },
+      { id: 'maint_parts', title: 'Erro peças manutenção', keywords: ['kit fusão','roletes'], steps: ['Acesse menu técnico','Execute reset de manutenção'] },
+      { id: 'queue', title: 'Fila de impressão travada', keywords: ['fila','travada'], steps: ['Limpe o spooler no Windows','Reinicie serviço de impressão'] },
+      { id: 'strange_chars', title: 'Imprime códigos estranhos', keywords: ['códigos','estranhos'], steps: ['Instale driver PCL correto','Ou driver PostScript'] },
+      { id: 'slow_print', title: 'Documento demora a imprimir', keywords: ['demora'], steps: ['Use driver específico','Evite driver genérico'] },
+      { id: 'duplex_lost', title: 'Configuração duplex sumiu', keywords: ['duplex sumiu'], steps: ['Reinstale o driver completo','Baixe do site oficial'] },
+      { id: 'margin_fail', title: 'Imprime fora da margem', keywords: ['fora da margem'], steps: ['Ajuste formato no driver','Verifique configurações de papel'] },
+      { id: 'wrong_port', title: 'Erro porta incorreta', keywords: ['porta'], steps: ['Redefina porta de comunicação','Configure porta TCP/IP'] },
+      { id: 'scan_email', title: 'Não digitaliza para e-mail', keywords: ['email'], steps: ['Configure servidor SMTP','Verifique credenciais'] },
+      { id: 'scan_network', title: 'Erro salvar digitalização', keywords: ['digitalização'], steps: ['Configure pasta compartilhada','Verifique permissões de rede'] },
+      { id: 'pdf_slow', title: 'PDF muito lento', keywords: ['pdf lento'], steps: ['Ative imprimir como imagem','No Adobe Reader'] },
+      { id: 'fw_outdated', title: 'Firmware desatualizado', keywords: ['firmware'], steps: ['Acesse site oficial da marca','Baixe e instale atualização'] }
     ];
 
-    function getQueryParam(name){ try{ const url = new URL(window.location.href); return url.searchParams.get(name); }catch(e){ return null; } }
+    // DOM Elements
+    const elements = {
+      printerInfo: document.getElementById('printerInfo'),
+      issueSelect: document.getElementById('issueSelect'),
+      customIssue: document.getElementById('customIssue'),
+      searchBtn: document.getElementById('searchBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      solutionCard: document.getElementById('solutionCard'),
+      solutionTitle: document.getElementById('solutionTitle'),
+      solutionSteps: document.getElementById('solutionSteps'),
+      resolvedBtn: document.getElementById('resolvedBtn'),
+      notResolvedBtn: document.getElementById('notResolvedBtn'),
+      ticketCard: document.getElementById('ticketCard'),
+      observationInput: document.getElementById('observationInput'),
+      openTicketBtn: document.getElementById('openTicketBtn'),
+      successModal: document.getElementById('successModal'),
+      closeSuccessModal: document.getElementById('closeSuccessModal'),
+      ticketModal: document.getElementById('ticketModal'),
+      cancelTicket: document.getElementById('cancelTicket'),
+      confirmTicket: document.getElementById('confirmTicket'),
+      toast: document.getElementById('toast')
+    };
 
-    function populateIssueSelect(){
-      const sel = document.getElementById('issueSelect');
-      KB.forEach(k => { const opt = document.createElement('option'); opt.value = k.id; opt.textContent = k.title; sel.appendChild(opt); });
-      const other = document.createElement('option'); other.value='other'; other.textContent='Outro (digitar)'; sel.appendChild(other);
+    let currentMatch = null;
+    let currentPrinter = getQueryParam('printer') || '';
+
+    function getQueryParam(name) {
+      try {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+      } catch(e) {
+        return null;
+      }
     }
 
-    function findKBById(id){ return KB.find(k=>k.id===id); }
-    function findMatches(text){ if(!text) return []; const t=text.toLowerCase(); return KB.filter(k => k.keywords.some(w=>t.includes(w))); }
+    function showToast(message, duration = 3000) {
+      elements.toast.textContent = message;
+      elements.toast.classList.add('show');
+      setTimeout(() => {
+        elements.toast.classList.remove('show');
+      }, duration);
+    }
 
-    const issueSelect=document.getElementById('issueSelect');
-    const customIssue=document.getElementById('customIssue');
-    const searchBtn=document.getElementById('searchBtn');
-    const clearBtn=document.getElementById('clearBtn');
-    const result=document.getElementById('result');
-    const matchTitle=document.getElementById('matchTitle');
-    const matchSteps=document.getElementById('matchSteps');
-    const callActions=document.getElementById('callActions');
-    const openSN=document.getElementById('openSN');
-    const resolvedYes=document.getElementById('resolvedYes');
-    const resolvedNo=document.getElementById('resolvedNo');
-    const obsInput=document.getElementById('obs');
-    const printerInfoElem=document.getElementById('printerInfo');
+    function populateIssueSelect() {
+      // Limpa opções existentes (exceto a primeira)
+      const firstOption = elements.issueSelect.querySelector('option[value=""]');
+      elements.issueSelect.innerHTML = '';
+      elements.issueSelect.appendChild(firstOption);
+      
+      // Adiciona todas as opções da KB
+      KB.forEach(k => {
+        const option = document.createElement('option');
+        option.value = k.id;
+        option.textContent = k.title;
+        elements.issueSelect.appendChild(option);
+      });
 
-    let currentMatch=null;
-    let currentPrinter=getQueryParam('printer')||'';
-    if(currentPrinter){ printerInfoElem.textContent='Impressora: '+currentPrinter; } else { printerInfoElem.style.display='none'; }
+      // Adiciona opção "Outro"
+      const otherOption = document.createElement('option');
+      otherOption.value = 'other';
+      otherOption.textContent = 'Outro (digitar)';
+      elements.issueSelect.appendChild(otherOption);
+      
+      console.log('Populated select with', KB.length, 'options'); // Debug
+    }
 
-    populateIssueSelect();
+    function findKBById(id) {
+      return KB.find(k => k.id === id);
+    }
 
-    searchBtn.addEventListener('click',()=>{
-      const selVal=issueSelect.value; const custom=(customIssue.value||'').trim(); let matches=[];
-      if(selVal&&selVal!=='other'){ const k=findKBById(selVal); if(k) matches=[k]; }
-      else if(custom){ matches=findMatches(custom); }
-      if(matches.length>0){ const m=matches[0]; matchTitle.textContent=m.title; matchSteps.innerHTML='<ol class="steps">'+m.steps.map(s=>'<li>'+s+'</li>').join('')+'</ol>'; currentMatch=m; }
-      else if(custom){ matchTitle.textContent='Solução genérica'; matchSteps.innerHTML='<li>Desligue a impressora</li><li>Verifique cabos e papel</li>'; }
-      result.style.display='block'; callActions.style.display='none';
-    });
+    function findMatches(text) {
+      if (!text) return [];
+      const searchText = text.toLowerCase();
+      
+      // Busca por palavras-chave exatas
+      let matches = KB.filter(k => 
+        k.keywords.some(keyword => searchText.includes(keyword.toLowerCase()))
+      );
+      
+      // Se não encontrou por keywords, busca no título
+      if (matches.length === 0) {
+        matches = KB.filter(k => 
+          k.title.toLowerCase().includes(searchText) ||
+          searchText.includes(k.title.toLowerCase())
+        );
+      }
+      
+      // Busca por palavras individuais se ainda não encontrou
+      if (matches.length === 0) {
+        const words = searchText.split(' ').filter(word => word.length > 2);
+        matches = KB.filter(k => 
+          words.some(word => 
+            k.keywords.some(keyword => keyword.toLowerCase().includes(word)) ||
+            k.title.toLowerCase().includes(word)
+          )
+        );
+      }
+      
+      return matches;
+    }
 
-    clearBtn.addEventListener('click',()=>{ issueSelect.value=''; customIssue.value=''; result.style.display='none'; currentMatch=null; });
-    resolvedYes.addEventListener('click',()=>{ alert('Que bom! Marcado como resolvido.'); });
-    resolvedNo.addEventListener('click',()=>{ callActions.style.display='block'; obsInput.focus(); });
-    openSN.addEventListener('click',()=>{ const issueText=(customIssue.value||'').trim()||(currentMatch?currentMatch.title:'Problema informado'); const shortDesc=`Chamado - ${currentPrinter||'IMP_NA'} - ${issueText}`; const longDesc=`Impressora: ${currentPrinter||'NA'}\nProblema: ${issueText}\nObs: ${obsInput.value||''}`; const url=SERVICENOW_URL+`?short_description=`+encodeURIComponent(shortDesc)+`&description=`+encodeURIComponent(longDesc); window.open(url,'_blank'); });
+    function showModal(modalElement) {
+      modalElement.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideModal(modalElement) {
+      modalElement.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function displaySolution(match) {
+      elements.solutionTitle.textContent = match.title;
+      elements.solutionSteps.innerHTML = match.steps
+        .map(step => `<li>${step}</li>`)
+        .join('');
+      
+      elements.solutionCard.classList.remove('hidden');
+      elements.ticketCard.classList.add('hidden');
+      
+      // Smooth scroll to solution
+      elements.solutionCard.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+      });
+    }
+
+    function showGenericSolution() {
+      elements.solutionTitle.textContent = 'Solução genérica';
+      elements.solutionSteps.innerHTML = `
+        <li>Desligue a impressora da tomada</li>
+        <li>Aguarde 30 segundos</li>
+        <li>Verifique conexões e papel</li>
+        <li>Ligue novamente a impressora</li>
+      `;
+      
+      elements.solutionCard.classList.remove('hidden');
+      elements.ticketCard.classList.add('hidden');
+      
+      // Smooth scroll to solution
+      elements.solutionCard.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+      });
+    }
+
+    function clearForm() {
+      elements.issueSelect.value = '';
+      elements.customIssue.value = '';
+      elements.observationInput.value = '';
+      elements.solutionCard.classList.add('hidden');
+      elements.ticketCard.classList.add('hidden');
+      currentMatch = null;
+    }
+
+    function handleSearch() {
+      const selectedValue = elements.issueSelect.value;
+      const customText = elements.customIssue.value.trim();
+      
+      console.log('Search initiated:', { selectedValue, customText }); // Debug
+      
+      let matches = [];
+      
+      // Prioridade para seleção no dropdown
+      if (selectedValue && selectedValue !== 'other' && selectedValue !== '') {
+        const match = findKBById(selectedValue);
+        console.log('Found by ID:', match); // Debug
+        if (match) {
+          matches = [match];
+        }
+      } 
+      // Se não selecionou no dropdown, busca por texto
+      else if (customText) {
+        matches = findMatches(customText);
+        console.log('Found by text:', matches); // Debug
+      }
+      
+      if (matches.length > 0) {
+        currentMatch = matches[0];
+        displaySolution(currentMatch);
+        showToast(`Solução encontrada: ${currentMatch.title}`);
+      } else if (customText) {
+        // Se digitou algo mas não encontrou, mostra solução genérica
+        currentMatch = null;
+        showGenericSolution();
+        showToast('Aplicando solução genérica');
+      } else {
+        showToast('Por favor, selecione ou descreva o problema');
+      }
+    }
+
+    function handleResolved() {
+      showModal(elements.successModal);
+      // Analytics could be added here
+    }
+
+    function handleNotResolved() {
+      elements.ticketCard.classList.remove('hidden');
+      elements.observationInput.focus();
+      
+      // Smooth scroll to ticket form
+      elements.ticketCard.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'nearest' 
+      });
+      
+      showToast('Preenchendo dados para chamado...');
+    }
+
+    function handleOpenTicket() {
+      showModal(elements.ticketModal);
+    }
+
+    function openServiceNowTicket() {
+      const issueText = elements.customIssue.value.trim() || 
+                       (currentMatch ? currentMatch.title : 'Problema informado');
+      const observation = elements.observationInput.value.trim();
+      
+      const shortDesc = `Chamado - ${currentPrinter || 'IMP_NA'} - ${issueText}`;
+      const longDesc = `Impressora: ${currentPrinter || 'NA'}\nProblema: ${issueText}\nObservação: ${observation || 'Nenhuma'}`;
+      
+      const url = SERVICENOW_URL + 
+                  `?short_description=${encodeURIComponent(shortDesc)}` +
+                  `&description=${encodeURIComponent(longDesc)}`;
+      
+      // Show loading state
+      const btnText = elements.openTicketBtn.querySelector('.btn-text');
+      const loading = elements.openTicketBtn.querySelector('.loading');
+      
+      btnText.textContent = 'Abrindo...';
+      loading.classList.remove('hidden');
+      elements.openTicketBtn.disabled = true;
+      
+      // Simulate loading delay for better UX
+      setTimeout(() => {
+        window.open(url, '_blank');
+        
+        // Reset button state
+        btnText.textContent = 'Abrir chamado no ServiceNow';
+        loading.classList.add('hidden');
+        elements.openTicketBtn.disabled = false;
+        
+        hideModal(elements.ticketModal);
+        showToast('Chamado aberto no ServiceNow!');
+      }, 1500);
+    }
+
+    // Initialize app
+    function init() {
+      // Setup printer info
+      if (currentPrinter) {
+        elements.printerInfo.textContent = `Impressora: ${currentPrinter}`;
+        elements.printerInfo.classList.remove('hidden');
+      }
+
+      // Populate select options
+      populateIssueSelect();
+
+      // Event listeners
+      elements.searchBtn.addEventListener('click', handleSearch);
+      elements.clearBtn.addEventListener('click', clearForm);
+      elements.resolvedBtn.addEventListener('click', handleResolved);
+      elements.notResolvedBtn.addEventListener('click', handleNotResolved);
+      elements.openTicketBtn.addEventListener('click', handleOpenTicket);
+      
+      // Modal event listeners
+      elements.closeSuccessModal.addEventListener('click', () => {
+        hideModal(elements.successModal);
+        clearForm();
+      });
+      
+      elements.cancelTicket.addEventListener('click', () => {
+        hideModal(elements.ticketModal);
+      });
+      
+      elements.confirmTicket.addEventListener('click', () => {
+        hideModal(elements.ticketModal);
+        openServiceNowTicket();
+      });
+
+      // Close modals on overlay click
+      [elements.successModal, elements.ticketModal].forEach(modal => {
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            hideModal(modal);
+          }
+        });
+      });
+
+      // Auto-clear other field when selecting from dropdown
+      elements.issueSelect.addEventListener('change', (e) => {
+        console.log('Select changed:', e.target.value); // Debug
+        if (e.target.value && e.target.value !== 'other') {
+          elements.customIssue.value = '';
+          // Auto-search quando seleciona no dropdown
+          setTimeout(() => handleSearch(), 100);
+        }
+      });
+
+      // Auto-clear dropdown when typing
+      elements.customIssue.addEventListener('input', (e) => {
+        if (e.target.value.trim()) {
+          elements.issueSelect.value = '';
+        }
+      });
+
+      // Enter key support
+      [elements.customIssue].forEach(input => {
+        input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            handleSearch();
+          }
+        });
+      });
+
+      // Keyboard navigation for modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (elements.successModal.classList.contains('active')) {
+            hideModal(elements.successModal);
+          }
+          if (elements.ticketModal.classList.contains('active')) {
+            hideModal(elements.ticketModal);
+          }
+        }
+      });
+
+      // Focus management for accessibility
+      elements.successModal.addEventListener('transitionend', () => {
+        if (elements.successModal.classList.contains('active')) {
+          elements.closeSuccessModal.focus();
+        }
+      });
+
+      elements.ticketModal.addEventListener('transitionend', () => {
+        if (elements.ticketModal.classList.contains('active')) {
+          elements.confirmTicket.focus();
+        }
+      });
+    }
+
+    // Start the application
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
